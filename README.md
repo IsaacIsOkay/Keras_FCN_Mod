@@ -6,11 +6,15 @@ This is not up to date, currently working on repo and code clean up. Will push r
 ---------
 Fully convolutional networks and semantic segmentation with Keras.
 
-![Biker Image](doc/2007_000129.jpg)
+![Original Image](sampleData/0000.png)
 
-![Biker Ground Truth](doc/2007_000129.png)
+![Ground Truth](sampleData/0000_label.png)
 
-![Biker as classified by AtrousFCN_Resnet50_16s](doc/AtrousFCN_Resnet50_16s_2007_000129.png)
+![Augmented Version](sampleData/9721.png)
+
+![Aug Ground Truth](sampleData/9721_label.png)
+
+![Result](sampleData/9721_result.png)
 
 ## Models
 
