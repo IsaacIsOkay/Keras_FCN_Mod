@@ -1,8 +1,9 @@
 
 
-Keras-FCN
+Keras-FCN-Mod
 ---------
-
+This is not up to date, currently working on repo and code clean up. Will push readme update when completed.
+---------
 Fully convolutional networks and semantic segmentation with Keras.
 
 ![Biker Image](doc/2007_000129.jpg)
