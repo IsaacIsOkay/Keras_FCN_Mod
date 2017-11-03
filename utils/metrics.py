@@ -1,9 +1,23 @@
 import keras.backend as K
 import tensorflow as tf
+import os
+from keras.preprocessing.image import *
 from tensorflow.contrib.metrics import streaming_mean_iou
+from PIL import Image
+import numpy as np
+import cv2
 
 
 def sparse_accuracy_ignoring_last_label(y_true, y_pred):
+    '''
+    save_prefix = "test"
+    save_to_dir = ('~/KerasWorkspace/Keras-FCN/weedSpec1/debug2')
+    fname = '{prefix}_{hash}'.format(prefix=save_prefix,
+		              hash=np.random.randint(1e4))
+    img.save(os.path.join(save_to_dir, 'img_' + fname + '.{format}'.format(format='png')))
+    label.save(os.path.join(save_to_dir, 'label_' + fname + '.png'))
+    '''
+
     nb_classes = K.int_shape(y_pred)[-1]
     y_pred = K.reshape(y_pred, (-1, nb_classes))
 

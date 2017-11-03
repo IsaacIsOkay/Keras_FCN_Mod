@@ -29,7 +29,7 @@ def calculate_iou(model_name, nb_classes, res_dir, label_dir, image_list):
         flat_label = np.ravel(label)
         # acc = 0.
         for p, l in zip(flat_pred, flat_label):
-            if l == 255:
+            if l == 5:
                 continue
             if l < nb_classes and p < nb_classes:
                 conf_m[l, p] += 1
@@ -54,7 +54,8 @@ def evaluate(model_name, weight_file, image_size, nb_classes, batch_size, val_fi
           label_suffix='.png',
           data_suffix='.jpg'):
     current_dir = os.path.dirname(os.path.realpath(__file__))
-    save_dir = os.path.join(current_dir, 'Models/'+model_name+'/res/')
+    #save_dir = os.path.join(current_dir, 'Models/'+model_name+'/res/')
+    save_dir = os.path.join(current_dir, 'weedSpec1/result_WeedSpec_FCN_16')
     if os.path.exists(save_dir) == False:
         os.mkdir(save_dir)
     fp = open(val_file_path)
@@ -68,6 +69,8 @@ def evaluate(model_name, weight_file, image_size, nb_classes, batch_size, val_fi
     print('{}s used to make predictions.\n'.format(duration))
 
     start_time = time.time()
+    
+    '''
     conf_m, IOU, meanIOU = calculate_iou(model_name, nb_classes, save_dir, label_dir, image_list)
     print('IOU: ')
     print(IOU)
@@ -75,17 +78,19 @@ def evaluate(model_name, weight_file, image_size, nb_classes, batch_size, val_fi
     print('pixel acc: %f' % (np.sum(np.diag(conf_m))/np.sum(conf_m)))
     duration = time.time() - start_time
     print('{}s used to calculate IOU.\n'.format(duration))
+    '''
 
 if __name__ == '__main__':
+    model_name = 'WeedSpec_FCN_16'
     # model_name = 'Atrous_DenseNet'
-    model_name = 'AtrousFCN_Resnet50_16s'
+    # model_name = 'AtrousFCN_Resnet50_16s'
     # model_name = 'DenseNet_FCN'
-    weight_file = 'checkpoint_weights.hdf5'
+    weight_file = 'model_WeedSpec_FCN_16.hdf5'
     # weight_file = 'model.hdf5'
     image_size = (512, 512)
-    nb_classes = 21
+    nb_classes = 2
     batch_size = 1
-    dataset = 'VOC2012_BERKELEY'
+    dataset = 'weedspic'
     if dataset == 'VOC2012_BERKELEY':
         # pascal voc + berkeley semantic contours annotations
         train_file_path = os.path.expanduser('~/.keras/datasets/VOC2012/combined_imageset_train.txt') #Data/VOClarge/VOC2012/ImageSets/Segmentation
@@ -101,5 +106,13 @@ if __name__ == '__main__':
         data_dir        = os.path.expanduser('~/.keras/datasets/VOC2012/VOCdevkit/VOC2012/JPEGImages')
         label_dir       = os.path.expanduser('~/.keras/datasets/VOC2012/VOCdevkit/VOC2012/SegmentationClass')
         label_suffix = '.npy'
+    if dataset == 'weedspic':
+	train_file_path = os.path.expanduser('~/.keras/datasets/weedspic/lettuce/train.txt') 
+	val_file_path   = os.path.expanduser('~/.keras/datasets/weedspic/lettuce/validation.txt')
+	data_dir        = os.path.expanduser('~/.keras/datasets/weedspic/lettuce/image_aug')
+	label_dir       = os.path.expanduser('~/.keras/datasets/weedspic/lettuce/label_aug')
+	data_suffix='.png'
+	label_suffix='.png'
+	classes = 2
     evaluate(model_name, weight_file, image_size, nb_classes, batch_size, val_file_path, data_dir, label_dir,
              label_suffix=label_suffix, data_suffix=data_suffix)

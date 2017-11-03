@@ -3,6 +3,7 @@ from keras.applications.imagenet_utils import preprocess_input
 from keras import backend as K
 from PIL import Image
 import numpy as np
+import tensorflow as tf
 import os
 import cv2
 
@@ -97,15 +98,14 @@ class SegDirectoryIterator(Iterator):
     label_suffix: label file suffix, such as `.png`, or `.npy`
     loss_shape: shape to use when applying loss function to the label data
     '''
-
     def __init__(self, file_path, seg_data_generator,
                  data_dir, data_suffix,
-                 label_dir, label_suffix, classes, ignore_label=255,
-                 crop_mode='none', label_cval=255, pad_size=None,
+                 label_dir, label_suffix, classes, ignore_label=100,
+                 crop_mode='none', label_cval=100, pad_size=None,
                  target_size=None, color_mode='rgb',
                  data_format='default', class_mode='sparse',
                  batch_size=1, shuffle=True, seed=None,
-                 save_to_dir=None, save_prefix='', save_format='jpeg',
+                 save_to_dir='/home/default/KerasWorkspace/Keras-FCN/weedSpec1', save_prefix='test', save_format='png',
                  loss_shape=None):
         if data_format == 'default':
             data_format = K.image_data_format()
@@ -121,6 +121,7 @@ class SegDirectoryIterator(Iterator):
         self.crop_mode = crop_mode
         self.label_cval = label_cval
         self.pad_size = pad_size
+	
         if color_mode not in {'rgb', 'grayscale'}:
             raise ValueError('Invalid color mode:', color_mode,
                              '; expected "rgb" or "grayscale".')
@@ -159,10 +160,11 @@ class SegDirectoryIterator(Iterator):
                              '; expected one of '
                              '"sparse", or None.')
         self.class_mode = class_mode
-        if save_to_dir:
-            self.palette = None
-        self.save_to_dir = save_to_dir
-        self.save_prefix = save_prefix
+        
+	
+        self.palette = None
+        self.save_to_dir = '/home/default/KerasWorkspace/Keras-FCN/weedSpec1/segGenTest'
+       	self.save_prefix = 'test'
         self.save_format = save_format
 
         white_list_formats = {'png', 'jpg', 'jpeg', 'bmp', 'npy'}
@@ -205,6 +207,7 @@ class SegDirectoryIterator(Iterator):
             data_file = self.data_files[j]
             label_file = self.label_files[j]
             img_file_format = 'img'
+	    #this is where the images are loaded in
             img = load_img(os.path.join(self.data_dir, data_file),
                            grayscale=grayscale, target_size=None)
             label_filepath = os.path.join(self.label_dir, label_file)
@@ -218,7 +221,7 @@ class SegDirectoryIterator(Iterator):
 
             # do padding
             if self.target_size:
-                if self.crop_mode != 'none':
+                if self.crop_mode != 'none': # this if evalutates as false
                     x = img_to_array(img, data_format=self.data_format)
                     if self.label_file_format is not 'npy':
                         y = img_to_array(
@@ -241,9 +244,10 @@ class SegDirectoryIterator(Iterator):
                     x = img_to_array(img.resize((self.target_size[1], self.target_size[0]),
                                                 Image.BILINEAR),
                                      data_format=self.data_format)
-                    if self.label_file_format is not 'npy':
+                    if self.label_file_format is not 'npy': #grabs the labels into array
                         y = img_to_array(label.resize((self.target_size[1], self.target_size[
-                                         0]), Image.NEAREST), data_format=self.data_format).astype(int)
+                                         0]), Image.NEAREST), data_format=self.data_format).astype(np.uint8)
+			#print(y)
                     else:
                         print('ERROR: resize not implemented for label npy file')
 
@@ -259,14 +263,44 @@ class SegDirectoryIterator(Iterator):
 
             if self.ignore_label:
                 y[np.where(y == self.ignore_label)] = self.classes
+		y[np.where(y == 255)] = self.classes-1
 
             if self.loss_shape is not None:
                 y = np.reshape(y, self.loss_shape)
+	    '''
+	    current_dir = os.path.dirname(os.path.realpath(__file__))
+	    save_dir = os.path.join("/home/default/KerasWorkspace/Keras-FCN/weedSpec1/oneHotTest/")
+	    np.savetxt('%s%s(y_pred).csv'%(save_dir,current_index), y, delimiter=",")
+            '''
 
-            batch_x[i] = x
+	    batch_x[i] = x
             batch_y[i] = y
+	    
+            '''
+	    current_dir = os.path.dirname(os.path.realpath(__file__))
+	    save_dir = os.path.join("/home/default/KerasWorkspace/Keras-FCN/weedSpec1/oneHotTest/")
+            
+	    #y = K.one_hot(tf.to_int32(K.flatten(y)), self.classes + 1)
+	    y = K.one_hot(tf.to_int32(batch_y[i]), 3)
+	    print(y.shape)
+	    result = y
+	    sess = tf.Session()
+	    with sess.as_default():
+	    	res = result.eval()
+	    res = np.squeeze(res)
+	    print(res.shape)
+	    res_1 = res[:,:,0]
+	    res_2 = res[:,:,1]
+	    res_3 = res[:,:,2]
+	    np.savetxt('%s%s(0).csv'%(save_dir,current_index), res_1, delimiter=",")
+	    np.savetxt('%s%s(1).csv'%(save_dir,current_index), res_2, delimiter=",")
+	    np.savetxt('%s%s(2).csv'%(save_dir,current_index), res_3, delimiter=",")
+	    print("saved?")
+	    '''
+	    
         # optionally save augmented images to disk for debugging purposes
-        if self.save_to_dir:
+	'''
+	if self.save_to_dir:
             for i in range(current_batch_size):
                 img = array_to_img(batch_x[i], self.data_format, scale=True)
                 label = batch_y[i][:, :, 0].astype('uint8')
@@ -276,11 +310,15 @@ class SegDirectoryIterator(Iterator):
                 fname = '{prefix}_{index}_{hash}'.format(prefix=self.save_prefix,
                                                          index=current_index + i,
                                                          hash=np.random.randint(1e4))
-                img.save(os.path.join(self.save_to_dir, 'img_' +
-                                      fname + '.{format}'.format(format=self.save_format)))
+                #img.save(os.path.join(self.save_to_dir, 'img_' +
+                                       #fname + '.{format}'.format(format=self.save_format)))
+		img.save(os.path.join(self.save_to_dir, 'img_' +
+                                       fname + '.png'))
                 label.save(os.path.join(self.save_to_dir,
                                         'label_' + fname + '.png'))
+	
         # return
+	'''
         batch_x = preprocess_input(batch_x)
         if self.class_mode == 'sparse':
             return batch_x, batch_y
@@ -305,7 +343,7 @@ class SegDataGenerator(object):
                  channel_shift_range=0.,
                  fill_mode='constant',
                  cval=0.,
-                 label_cval=255,
+                 label_cval=100,
                  crop_mode='none',
                  crop_size=(0, 0),
                  pad_size=None,
@@ -321,7 +359,6 @@ class SegDataGenerator(object):
         self.std = None
         self.principal_components = None
         self.rescale = rescale
-
         if data_format not in {'channels_last', 'channels_first'}:
             raise Exception('data_format should be channels_last (channel after row and '
                             'column) or channels_first (channel before row and column). '
@@ -350,7 +387,7 @@ class SegDataGenerator(object):
 
     def flow_from_directory(self, file_path, data_dir, data_suffix,
                             label_dir, label_suffix, classes,
-                            ignore_label=255,
+                            ignore_label=5,
                             target_size=None, color_mode='rgb',
                             class_mode='sparse',
                             batch_size=32, shuffle=True, seed=None,

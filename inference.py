@@ -14,12 +14,13 @@ from models import *
 
 
 def inference(model_name, weight_file, image_size, image_list, data_dir, label_dir, return_results=True, save_dir=None,
-              label_suffix='.png',
-              data_suffix='.jpg'):
+              label_suffix='.bmp',
+              data_suffix='.bmp'):
     current_dir = os.path.dirname(os.path.realpath(__file__))
     # mean_value = np.array([104.00699, 116.66877, 122.67892])
-    batch_shape = (1, ) + image_size + (3, )
-    save_path = os.path.join(current_dir, 'Models/'+model_name)
+    batch_shape = (1, ) + image_size + (3, )      #(images per batch, width, height, depth)
+    #save_path = os.path.join(current_dir, 'Models/'+model_name)
+    save_path = os.path.join(current_dir, 'weedSpec1/')
     model_path = os.path.join(save_path, "model.json")
     checkpoint_path = os.path.join(save_path, weight_file)
     # model_path = os.path.join(current_dir, 'model_weights/fcn_atrous/model_change.hdf5')
@@ -62,8 +63,18 @@ def inference(model_name, weight_file, image_size, image_list, data_dir, label_d
         image = preprocess_input(image)
 
         result = model.predict(image, batch_size=1)
-        result = np.argmax(np.squeeze(result), axis=-1).astype(np.uint8)
-
+	#classes are either 0 or 1 depending on which one has the max value for the prediction
+	
+	result = np.squeeze(result)
+	#result = np.absolute(result)
+	result = np.argmax(result, axis=-1).astype(np.uint8)
+	
+	for i in range (0, 511):
+	 for j in range (0,511):
+		if(result[i][j] == 1):
+			result[i][j] = 255
+	
+        #result = np.argmax(result, axis=-1).astype(np.uint8)
         result_img = Image.fromarray(result, mode='P')
         result_img.palette = label.palette
         # result_img = result_img.resize(label_size, resample=Image.BILINEAR)
@@ -73,16 +84,18 @@ def inference(model_name, weight_file, image_size, image_list, data_dir, label_d
             results.append(result_img)
         if save_dir:
             result_img.save(os.path.join(save_dir, img_num + '.png'))
+	
     return results
 
 if __name__ == '__main__':
+    model_name = 'WeedSpec_FCN_16'
     # model_name = 'AtrousFCN_Resnet50_16s'
     # model_name = 'Atrous_DenseNet'
-    model_name = 'DenseNet_FCN'
+    # model_name = 'DenseNet_FCN'
     weight_file = 'checkpoint_weights.hdf5'
     image_size = (512, 512)
-    data_dir        = os.path.expanduser('~/.keras/datasets/VOC2012/VOCdevkit/VOC2012/JPEGImages')
-    label_dir       = os.path.expanduser('~/.keras/datasets/VOC2012/VOCdevkit/VOC2012/SegmentationClass')
+    data_dir        = os.path.expanduser('~/.keras/datasets/weedspic/image')
+    label_dir       = os.path.expanduser('~/.keras/datasets/weedspic/label')
 
     image_list = sys.argv[1:]#'2007_000491'
     results = inference(model_name, weight_file, image_size, image_list, data_dir, label_dir)

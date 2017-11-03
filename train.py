@@ -4,7 +4,7 @@ from pylab import *
 import os
 import sys
 import pickle
-from keras.optimizers import SGD, Adam, Nadam
+from keras.optimizers import SGD, Adam, Nadam, Adadelta
 from keras.callbacks import *
 from keras.objectives import *
 from keras.metrics import binary_accuracy
@@ -28,17 +28,19 @@ def train(batch_size, epochs, lr_base, lr_power, weight_decay, classes,
           loss_shape=None,
           label_suffix='.png',
           data_suffix='.jpg',
-          ignore_label=255,
-          label_cval=255):
+          ignore_label=None,
+          label_cval=0):
     if target_size:
         input_shape = target_size + (3,)
     else:
         input_shape = (None, None, 3)
     batch_shape = (batch_size,) + input_shape
+    
 
     ###########################################################
     current_dir = os.path.dirname(os.path.realpath(__file__))
-    save_path = os.path.join(current_dir, 'Models/' + model_name)
+    #save_path = os.path.join(current_dir, 'Models/' + model_name)
+    save_path = os.path.join(current_dir, 'weedSpec1')
     if os.path.exists(save_path) is False:
         os.mkdir(save_path)
 
@@ -72,19 +74,20 @@ def train(batch_size, epochs, lr_base, lr_power, weight_decay, classes,
         print('lr: %f' % lr)
         return lr
     scheduler = LearningRateScheduler(lr_scheduler)
+    # ###################### debug callback ####################
 
     # ###################### make model ########################
     checkpoint_path = os.path.join(save_path, 'checkpoint_weights.hdf5')
 
     model = globals()[model_name](weight_decay=weight_decay,
-                                  input_shape=input_shape,
+                                  batch_shape=batch_shape,
                                   batch_momentum=batchnorm_momentum,
                                   classes=classes)
 
     # ###################### optimizer ########################
     optimizer = SGD(lr=lr_base, momentum=0.9)
+    # optimizer = Adam(lr=lr_base)
     # optimizer = Nadam(lr=lr_base, beta_1 = 0.825, beta_2 = 0.99685)
-
     model.compile(loss=loss_fn,
                   optimizer=optimizer,
                   metrics=metrics)
@@ -105,28 +108,31 @@ def train(batch_size, epochs, lr_base, lr_power, weight_decay, classes,
     # early_stopper   = EarlyStopping(monitor=sparse_accuracy_ignoring_last_label, min_delta=0.0001, patience=70)
     # callbacks = [early_stopper, lr_reducer]
     callbacks = [scheduler]
-
-    # ####################### tfboard ###########################
-    if K.backend() == 'tensorflow':
-        tensorboard = TensorBoard(log_dir=os.path.join(save_path, 'logs'), histogram_freq=10, write_graph=True)
-        callbacks.append(tensorboard)
     # ################### checkpoint saver#######################
     checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, 'checkpoint_weights.hdf5'), save_weights_only=True)#.{epoch:d}
     callbacks.append(checkpoint)
     # set data generator and train
-    train_datagen = SegDataGenerator(zoom_range=[0.5, 2.0],
-                                     zoom_maintain_shape=True,
-                                     crop_mode='random',
+    
+    # ####################### tfboard ###########################
+    '''
+    if K.backend() == 'tensorflow':
+        tensorboard = TensorBoard(log_dir=os.path.join(save_path, 'logs'), histogram_freq=10, write_graph=True)
+        callbacks.append(tensorboard)
+    '''
+   
+    train_datagen = SegDataGenerator(#zoom_range=[0.5, 2.0],
+                                     #zoom_maintain_shape=True,
+                                     #crop_mode='random',
                                      crop_size=target_size,
                                      # pad_size=(505, 505),
-                                     rotation_range=0.,
-                                     shear_range=0,
-                                     horizontal_flip=True,
-                                     channel_shift_range=20.,
+                                     #rotation_range=60,
+                                     #shear_range=0,
+                                     #horizontal_flip=True,
+                                     #channel_shift_range=1.,
                                      fill_mode='constant',
-                                     label_cval=label_cval)
+                                     label_cval=label_cval,
+				     )
     val_datagen = SegDataGenerator()
-
     def get_file_len(file_path):
         fp = open(file_path)
         lines = fp.readlines()
@@ -163,15 +169,16 @@ def train(batch_size, epochs, lr_base, lr_power, weight_decay, classes,
         class_weight=class_weight
        )
 
-    model.save_weights(save_path+'/model.hdf5')
+    model.save_weights(save_path+'/model_WeedSpec_FCN_16.hdf5')
 
 if __name__ == '__main__':
-    model_name = 'AtrousFCN_Resnet50_16s'
+    model_name = 'WeedSpec_FCN_16'
+    #model_name = 'AtrousFCN_Resnet50_16s'
     #model_name = 'Atrous_DenseNet'
     #model_name = 'DenseNet_FCN'
-    batch_size = 16
+    batch_size = 10
     batchnorm_momentum = 0.95
-    epochs = 250
+    epochs = 1
     lr_base = 0.01 * (float(batch_size) / 16)
     lr_power = 0.9
     resume_training = False
@@ -180,8 +187,8 @@ if __name__ == '__main__':
     else:
         weight_decay = 1e-4
     target_size = (320, 320)
-    dataset = 'VOC2012_BERKELEY'
-    if dataset == 'VOC2012_BERKELEY':
+    dataset = 'weedspic'
+    if dataset == 'VOC2012_BERKELEY': #This is the one being used currently
         # pascal voc + berkeley semantic contours annotations
         train_file_path = os.path.expanduser('~/.keras/datasets/VOC2012/combined_imageset_train.txt') #Data/VOClarge/VOC2012/ImageSets/Segmentation
         # train_file_path = os.path.expanduser('~/.keras/datasets/oneimage/train.txt') #Data/VOClarge/VOC2012/ImageSets/Segmentation
@@ -205,15 +212,22 @@ if __name__ == '__main__':
         data_suffix='.jpg'
         ignore_label = None
         label_cval = 0
-
+    if dataset == 'weedspic':
+	train_file_path = os.path.expanduser('~/.keras/datasets/weedspic/lettuce/train.txt') 
+	val_file_path   = os.path.expanduser('~/.keras/datasets/weedspic/lettuce/validation.txt')
+	data_dir        = os.path.expanduser('~/.keras/datasets/weedspic/lettuce/image_aug')
+	label_dir       = os.path.expanduser('~/.keras/datasets/weedspic/lettuce/label_aug')
+	data_suffix='.png'
+	label_suffix='.png'
+	classes = 2
 
     # ###################### loss function & metric ########################
-    if dataset == 'VOC2012' or dataset == 'VOC2012_BERKELEY':
+    if dataset == 'VOC2012' or dataset == 'VOC2012_BERKELEY' or dataset == 'weedspic':
         loss_fn = softmax_sparse_crossentropy_ignoring_last_label
         metrics = [sparse_accuracy_ignoring_last_label]
         loss_shape = None
-        ignore_label = 255
-        label_cval = 255
+        ignore_label = 100
+        label_cval = 100
 
     # Class weight is not yet supported for 3+ dimensional targets
     # class_weight = {i: 1 for i in range(classes)}
