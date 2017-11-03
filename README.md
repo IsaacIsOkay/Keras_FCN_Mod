@@ -4,16 +4,19 @@ Keras-FCN-Mod
 ---------
 This is not up to date, currently working on repo and code clean up. Will push readme update when completed.
 ---------
-Fully convolutional networks and semantic segmentation with Keras.
+Binary pixlewise classification of lettuce, modification of Keras-FCN by aurora95: https://github.com/aurora95/Keras-FCN
 
+Images and their lables
 ![Original Image](sampleData/0000.png)
 
 ![Ground Truth](sampleData/0000_label.png)
 
+Generated augmented images used for training
 ![Augmented Version](sampleData/9721.png)
 
 ![Aug Ground Truth](sampleData/9721_label.png)
 
+Prediction for augmented image above
 ![Result](sampleData/9721_result.png)
 
 ## Models
