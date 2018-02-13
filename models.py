@@ -234,133 +234,133 @@ def AtrousFCN_Resnet50_16s(input_shape = None, weight_decay=0., batch_momentum=0
 
 #===================weedspec===========================================================================
 def WeedSpec_FCN_12(input_shape = None, weight_decay=0., batch_momentum=0.9, batch_shape=None, classes=2):
-	
-	model = Sequential()
+    
+    model = Sequential()
 
-	if batch_shape:
-        	image_size = batch_shape[1:3]
-    	else:
-       		image_size = input_shape[0:2]
-	
-	#Convolution layers DownSample-------------
-	model.add(Convolution2D(32, (3, 3), padding='same', activation = 'relu', name = 'con_1', batch_input_shape=batch_shape))
-	model.add(MaxPooling2D((2,2), strides=(2,2)))
-	model.add(Convolution2D(32, (3, 3), padding='same', activation = 'relu', name = 'con_2'))
-	model.add(MaxPooling2D((2,2), strides=(2,2)))
+    if batch_shape:
+        image_size = batch_shape[1:3]
+    else:
+        image_size = input_shape[0:2]
+    
+    #Convolution layers DownSample-------------
+    model.add(Convolution2D(32, (3, 3), padding='same', activation = 'relu', name = 'con_1', batch_input_shape=batch_shape))
+    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    model.add(Convolution2D(32, (3, 3), padding='same', activation = 'relu', name = 'con_2'))
+    model.add(MaxPooling2D((2,2), strides=(2,2)))
 
 
-	model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_3'))
-	model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_4'))
-	model.add(MaxPooling2D((2,2), strides=(2,2)))
-	model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_5'))
-	model.add(MaxPooling2D((2,2), strides=(2,2)))
-	
-	model.add(Convolution2D(128, (3, 3), padding='same', activation = 'relu', name = 'con_6'))
-	model.add(MaxPooling2D((2,2), strides=(2,2)))
-	
-	model.add(Convolution2D(2, (3, 3), dilation_rate=(2, 2), strides=(1, 1), padding='same', activation = 'linear', name = 'classify_1'))
-	model.add(Convolution2D(2, (1, 1), strides=(1, 1), padding='same', activation = 'linear', name = 'classify_2'))
-	
-	model.add(Convolution2D(128, (3, 3), padding='same', activation = 'relu', name = 'con_1_up'))
-	model.add(UpSampling2D((2,2)))
-	#Convolution layers UpSample
-	model.add(Convolution2D(64, (3,3), padding='same', activation = 'relu', name = 'con_2_up'))
-	model.add(UpSampling2D((2,2)))
-	model.add(Convolution2D(64, (3,3), padding='same', activation = 'relu', name = 'con_3_up'))
-	model.add(Convolution2D(64, (3,3), padding='same', activation = 'relu', name = 'con_4_up'))
-	model.add(UpSampling2D((2,2)))
+    model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_3'))
+    model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_4'))
+    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_5'))
+    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    
+    model.add(Convolution2D(128, (3, 3), padding='same', activation = 'relu', name = 'con_6'))
+    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    
+    model.add(Convolution2D(2, (3, 3), dilation_rate=(2, 2), strides=(1, 1), padding='same', activation = 'linear', name = 'classify_1'))
+    model.add(Convolution2D(2, (1, 1), strides=(1, 1), padding='same', activation = 'linear', name = 'classify_2'))
+    
+    model.add(Convolution2D(128, (3, 3), padding='same', activation = 'relu', name = 'con_1_up'))
+    model.add(UpSampling2D((2,2)))
+    #Convolution layers UpSample
+    model.add(Convolution2D(64, (3,3), padding='same', activation = 'relu', name = 'con_2_up'))
+    model.add(UpSampling2D((2,2)))
+    model.add(Convolution2D(64, (3,3), padding='same', activation = 'relu', name = 'con_3_up'))
+    model.add(Convolution2D(64, (3,3), padding='same', activation = 'relu', name = 'con_4_up'))
+    model.add(UpSampling2D((2,2)))
 
-	model.add(Convolution2D(32, (3,3), padding='same', activation = 'relu', name = 'con_5_up'))
-	model.add(UpSampling2D((2,2)))
-	model.add(Convolution2D(32, (3,3), padding='same', activation = 'relu', name = 'con_6_up'))
-	model.add(UpSampling2D((2,2)))
-	model.add(Convolution2D(2, (1,1), padding='same', activation = 'sigmoid', name = 'final_conv'))
-	
-	return model
+    model.add(Convolution2D(32, (3,3), padding='same', activation = 'relu', name = 'con_5_up'))
+    model.add(UpSampling2D((2,2)))
+    model.add(Convolution2D(32, (3,3), padding='same', activation = 'relu', name = 'con_6_up'))
+    model.add(UpSampling2D((2,2)))
+    model.add(Convolution2D(2, (1,1), padding='same', activation = 'sigmoid', name = 'final_conv'))
+    
+    return model
 def WeedSpec_FCN_16(input_shape = None, weight_decay=0., batch_momentum=0.9, batch_shape=None, classes=2):
-	
-	model = Sequential()
+    
+    model = Sequential()
 
-	if batch_shape:
-        	image_size = batch_shape[1:3]
-    	else:
-       		image_size = input_shape[0:2]
-	
-	#Convolution layers DownSample-------------
-	model.add(Convolution2D(32, (3, 3), padding='same', activation = 'relu', name = 'con_1', batch_input_shape=batch_shape))
-	model.add(MaxPooling2D((2,2), strides=(2,2)))
-	model.add(Convolution2D(32, (3, 3), padding='same', activation = 'relu', name = 'con_2'))
-	model.add(MaxPooling2D((2,2), strides=(2,2)))
+    if batch_shape:
+            image_size = batch_shape[1:3]
+    else:
+            image_size = input_shape[0:2]
+    
+    #Convolution layers DownSample-------------
+    model.add(Convolution2D(32, (3, 3), padding='same', activation = 'relu', name = 'con_1', batch_input_shape=batch_shape))
+    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    model.add(Convolution2D(32, (3, 3), padding='same', activation = 'relu', name = 'con_2'))
+    model.add(MaxPooling2D((2,2), strides=(2,2)))
 
 
-	model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_3'))
-	model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_4'))
-	model.add(MaxPooling2D((2,2), strides=(2,2)))
-	model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_5'))
-	model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_6'))
-	model.add(MaxPooling2D((2,2), strides=(2,2)))
-	
-	model.add(Convolution2D(128, (3, 3), padding='same', activation = 'relu', name = 'con_7'))
-	model.add(Convolution2D(128, (3, 3), padding='same', activation = 'relu', name = 'con_8'))
-	model.add(MaxPooling2D((2,2), strides=(2,2)))
-	
-	model.add(Convolution2D(2, (3, 3), dilation_rate=(2, 2), strides=(1, 1), padding='same', activation = 'linear', name = 'classify_1'))
-	model.add(Convolution2D(2, (1, 1), strides=(1, 1), padding='same', activation = 'linear', name = 'classify_2'))
-	
-	model.add(Convolution2D(128, (3, 3), padding='same', activation = 'relu', name = 'con_1_up'))
-	model.add(Convolution2D(128, (3, 3), padding='same', activation = 'relu', name = 'con_2_up'))
-	model.add(UpSampling2D((2,2)))
-	#Convolution layers UpSample
-	model.add(Convolution2D(64, (3,3), padding='same', activation = 'relu', name = 'con_3_up'))
-	model.add(Convolution2D(64, (3,3), padding='same', activation = 'relu', name = 'con_4_up'))
-	model.add(UpSampling2D((2,2)))
-	model.add(Convolution2D(64, (3,3), padding='same', activation = 'relu', name = 'con_5_up'))
-	model.add(Convolution2D(64, (3,3), padding='same', activation = 'relu', name = 'con_6_up'))
-	model.add(UpSampling2D((2,2)))
+    model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_3'))
+    model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_4'))
+    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_5'))
+    model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_6'))
+    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    
+    model.add(Convolution2D(128, (3, 3), padding='same', activation = 'relu', name = 'con_7'))
+    model.add(Convolution2D(128, (3, 3), padding='same', activation = 'relu', name = 'con_8'))
+    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    
+    model.add(Convolution2D(2, (3, 3), dilation_rate=(2, 2), strides=(1, 1), padding='same', activation = 'linear', name = 'classify_1'))
+    model.add(Convolution2D(2, (1, 1), strides=(1, 1), padding='same', activation = 'linear', name = 'classify_2'))
+    
+    model.add(Convolution2D(128, (3, 3), padding='same', activation = 'relu', name = 'con_1_up'))
+    model.add(Convolution2D(128, (3, 3), padding='same', activation = 'relu', name = 'con_2_up'))
+    model.add(UpSampling2D((2,2)))
+    #Convolution layers UpSample
+    model.add(Convolution2D(64, (3,3), padding='same', activation = 'relu', name = 'con_3_up'))
+    model.add(Convolution2D(64, (3,3), padding='same', activation = 'relu', name = 'con_4_up'))
+    model.add(UpSampling2D((2,2)))
+    model.add(Convolution2D(64, (3,3), padding='same', activation = 'relu', name = 'con_5_up'))
+    model.add(Convolution2D(64, (3,3), padding='same', activation = 'relu', name = 'con_6_up'))
+    model.add(UpSampling2D((2,2)))
 
-	model.add(Convolution2D(32, (3,3), padding='same', activation = 'relu', name = 'con_7_up'))
-	model.add(UpSampling2D((2,2)))
-	model.add(Convolution2D(32, (3,3), padding='same', activation = 'relu', name = 'con_8_up'))
-	model.add(UpSampling2D((2,2)))
-	model.add(Convolution2D(2, (1,1), padding='same', activation = 'relu', name = 'final_conv'))
-	
-	return model
+    model.add(Convolution2D(32, (3,3), padding='same', activation = 'relu', name = 'con_7_up'))
+    model.add(UpSampling2D((2,2)))
+    model.add(Convolution2D(32, (3,3), padding='same', activation = 'relu', name = 'con_8_up'))
+    model.add(UpSampling2D((2,2)))
+    model.add(Convolution2D(2, (1,1), padding='same', activation = 'relu', name = 'final_conv'))
+    
+    return model
 def WeedSpec_FCN_10(input_shape = None, weight_decay=0., batch_momentum=0.9, batch_shape=None, classes=2):
-	
-	model = Sequential()
+    
+    model = Sequential()
 
-	if batch_shape:
-        	image_size = batch_shape[1:3]
-    	else:
-       		image_size = input_shape[0:2]
-	
-	#Convolution layers DownSample-------------
-	model.add(Convolution2D(32, (3, 3), padding='same', activation = 'relu', name = 'con_1', batch_input_shape=batch_shape))
-	model.add(MaxPooling2D((2,2), strides=(2,2)))
-	model.add(Convolution2D(32, (3, 3), padding='same', activation = 'relu', name = 'con_2'))
-	model.add(MaxPooling2D((2,2), strides=(2,2)))
+    if batch_shape:
+            image_size = batch_shape[1:3]
+    else:
+            image_size = input_shape[0:2]
+    
+    #Convolution layers DownSample-------------
+    model.add(Convolution2D(32, (3, 3), padding='same', activation = 'relu', name = 'con_1', batch_input_shape=batch_shape))
+    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    model.add(Convolution2D(32, (3, 3), padding='same', activation = 'relu', name = 'con_2'))
+    model.add(MaxPooling2D((2,2), strides=(2,2)))
 
 
-	model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_3'))
-	model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_4'))
-	model.add(MaxPooling2D((2,2), strides=(2,2)))
-	model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_5'))
-	model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_6'))
-	model.add(MaxPooling2D((2,2), strides=(2,2)))
-	
-	model.add(Convolution2D(128, (3, 3), padding='same', activation = 'relu', name = 'con_7'))
-	model.add(Convolution2D(128, (3, 3), padding='same', activation = 'relu', name = 'con_8'))
-	model.add(MaxPooling2D((2,2), strides=(2,2)))
-	
-	model.add(Convolution2D(2, (3, 3), dilation_rate=(2, 2), strides=(1, 1), padding='same', activation = 'linear', name = 'classify_1'))
-	model.add(Convolution2D(2, (1, 1), strides=(1, 1), padding='same', activation = 'linear', name = 'classify_2'))
-	
-	model.add(UpSampling2D((2,2)))
-	model.add(Convolution2D(2, (1,1), padding='same', activation = 'relu', name = 'final_conv'))
-	
-	return model
+    model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_3'))
+    model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_4'))
+    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_5'))
+    model.add(Convolution2D(64, (3, 3), padding='same', activation = 'relu', name = 'con_6'))
+    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    
+    model.add(Convolution2D(128, (3, 3), padding='same', activation = 'relu', name = 'con_7'))
+    model.add(Convolution2D(128, (3, 3), padding='same', activation = 'relu', name = 'con_8'))
+    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    
+    model.add(Convolution2D(2, (3, 3), dilation_rate=(2, 2), strides=(1, 1), padding='same', activation = 'linear', name = 'classify_1'))
+    model.add(Convolution2D(2, (1, 1), strides=(1, 1), padding='same', activation = 'linear', name = 'classify_2'))
+    
+    model.add(UpSampling2D((2,2)))
+    model.add(Convolution2D(2, (1,1), padding='same', activation = 'relu', name = 'final_conv'))
+    
+    return model
 
-#======================weedspec end===========================================================================	
+#======================weedspec end===========================================================================    
 
 def Atrous_DenseNet(input_shape=None, weight_decay=1E-4,
                     batch_momentum=0.9, batch_shape=None, classes=21,
