@@ -3,6 +3,8 @@
 Keras-FCN-Mod
 ---------
 This is not up to date, currently working on repo and code clean up. Will push readme update when completed.
+
+Python version 2.7 reccomended, not all code works in python version > 3
 ---------
 Binary pixlewise classification of lettuce, modification of Keras-FCN by aurora95: https://github.com/aurora95/Keras-FCN
 
