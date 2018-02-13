@@ -172,8 +172,8 @@ def train(batch_size, epochs, lr_base, lr_power, weight_decay, classes,
     model.save_weights(save_path+'/model_WeedSpec_FCN_16.hdf5')
 
 if __name__ == '__main__':
-    model_name = 'WeedSpec_FCN_16'
-    #model_name = 'AtrousFCN_Resnet50_16s'
+    #model_name = 'WeedSpec_FCN_16'
+    model_name = 'AtrousFCN_Resnet50_16s'
     #model_name = 'Atrous_DenseNet'
     #model_name = 'DenseNet_FCN'
     batch_size = 10
@@ -213,22 +213,27 @@ if __name__ == '__main__':
         ignore_label = None
         label_cval = 0
     if dataset == 'weedspic':
-	train_file_path = os.path.expanduser('~/.keras/datasets/weedspic/lettuce/train.txt') 
-	val_file_path   = os.path.expanduser('~/.keras/datasets/weedspic/lettuce/validation.txt')
-	data_dir        = os.path.expanduser('~/.keras/datasets/weedspic/lettuce/image_aug')
-	label_dir       = os.path.expanduser('~/.keras/datasets/weedspic/lettuce/label_aug')
-	data_suffix='.png'
-	label_suffix='.png'
-	classes = 2
+        train_file_path = os.path.expanduser('~/.keras/datasets/weedspic/lettuce/train.txt') 
+        val_file_path   = os.path.expanduser('~/.keras/datasets/weedspic/lettuce/validation.txt')
+        data_dir        = os.path.expanduser('~/.keras/datasets/weedspic/lettuce/image_aug')
+        label_dir       = os.path.expanduser('~/.keras/datasets/weedspic/lettuce/label_aug')
+        data_suffix='.png'
+        label_suffix='.png'
+        classes = 2
 
     # ###################### loss function & metric ########################
     if dataset == 'VOC2012' or dataset == 'VOC2012_BERKELEY' or dataset == 'weedspic':
         loss_fn = softmax_sparse_crossentropy_ignoring_last_label
         metrics = [sparse_accuracy_ignoring_last_label]
         loss_shape = None
+        ignore_label = 255
+        label_cval = 255
+    if dataset == 'weedspic':
+        loss_fn = softmax_sparse_crossentropy_ignoring_last_label
+        metrics = [sparse_accuracy_ignoring_last_label]
+        loss_shape = None
         ignore_label = 100
         label_cval = 100
-
     # Class weight is not yet supported for 3+ dimensional targets
     # class_weight = {i: 1 for i in range(classes)}
     # # The background class is much more common than all

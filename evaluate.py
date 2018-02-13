@@ -55,7 +55,7 @@ def evaluate(model_name, weight_file, image_size, nb_classes, batch_size, val_fi
           data_suffix='.jpg'):
     current_dir = os.path.dirname(os.path.realpath(__file__))
     #save_dir = os.path.join(current_dir, 'Models/'+model_name+'/res/')
-    save_dir = os.path.join(current_dir, 'weedSpec1/result_WeedSpec_FCN_16')
+    save_dir = os.path.join(current_dir, 'weedSpec1/result_WeedSpec_res_50')
     if os.path.exists(save_dir) == False:
         os.mkdir(save_dir)
     fp = open(val_file_path)
@@ -81,9 +81,9 @@ def evaluate(model_name, weight_file, image_size, nb_classes, batch_size, val_fi
     '''
 
 if __name__ == '__main__':
-    model_name = 'WeedSpec_FCN_16'
+    #model_name = 'WeedSpec_FCN_16'
     # model_name = 'Atrous_DenseNet'
-    # model_name = 'AtrousFCN_Resnet50_16s'
+    model_name = 'AtrousFCN_Resnet50_16s'
     # model_name = 'DenseNet_FCN'
     weight_file = 'model_WeedSpec_FCN_16.hdf5'
     # weight_file = 'model.hdf5'
